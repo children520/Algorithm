@@ -1,6 +1,8 @@
 package Searching;
 
 import javax.xml.soap.Node;
+
+import edu.princeton.cs.algs4.Queue;
 /*
  * 基于二叉查找树的符号表
  */
@@ -121,5 +123,50 @@ public class BST<Key extends Comparable<Key>,Value>{
 			if(cmp<0) return rank(key,x.left);
 			else if(cmp>0) return 1+size(x.left)+rank(key, x.right);
 			else return size(x.left);
+		}
+		public void deleteMin() {
+			root=deleteMin(root);
+		}
+		private Node deleteMin(Node x) {
+			if(x.left==null) return x.right;
+			x.left=deleteMin(x.left);
+			x.N=size(x.left)+size(x.right)+1;
+			return x;
+		}
+		public void delete(Key key) {
+			root=delete(root,key);
+		}
+		private Node delete(Node x,Key key) {
+			if(x==null) return null;
+			int cmp=key.compareTo(x.key);
+			if(cmp<0) x.left=delete(x.left, key);//递归向左寻找
+			else if(cmp>0) x.right=delete(x.right, key);
+			else {
+				if(x.right==null) return  x.left;
+				if(x.left==null) return x.right;
+				Node t=x;//将x指向即将被删除的结点的链接保存为t
+				x=min(t.right);//将x指向后继结点min(t.right)(右子树的最小结点)
+				x.right=deleteMin(t.right);//将x的右链接指向deleteMin(t.right)(在删除后所有结点大于x.key的子二叉树
+				x.left=t.left;//x的左链接设为t.left
+			}
+			x.N=size(x.left)+size(x.right)+1;
+			return x;
+		}
+		public Iterable<Key> keys(){
+			return keys(min(),max());
+		}
+		public Iterable<Key> keys(Key lo,Key hi){
+			Queue<Key> queue=new Queue<Key>();
+			keys(root,queue,lo,hi);
+			return queue;
+		}
+		private void keys(Node x,Queue<Key> queue,Key lo,Key hi) {
+			if(x==null) return;
+			int cmplo=lo.compareTo(x.key);
+			int cmphi=hi.compareTo(x.key);
+			if(cmplo<0) keys(x.left,queue,lo,hi);//如果左区间结点小于x,向左递归
+			if(cmphi>0) keys(x.right, queue, lo, hi);//如果右区间结点小于x,向右递归
+			if(cmplo<=0&&cmphi>=0) queue.enqueue(x.key);//相等则把区间元素入队
+			
 		}
 }
