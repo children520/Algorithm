@@ -32,6 +32,7 @@ public class RedBlackBST<Key extends Comparable<Key>,Value>{
 		if(x==null) return false;
 		return x.color==RED;
 	}
+	//左旋转h的右链接
 	private Node rotateLeft(Node h) {
 		Node x=h.right;
 		h.right=x.left;
@@ -55,5 +56,31 @@ public class RedBlackBST<Key extends Comparable<Key>,Value>{
 	public int size(Node x) {
 		if(x==null) return 0;
 		else return x.N;
+	}
+	//颜色变化
+	private void flipColors(Node h) {
+		h.color=RED;
+		h.left.color=BLACK;
+		h.right.color=BLACK;
+		
+	}
+	public void put(Key key,Value val) {
+		//查找key,找到则更新其值，否则为它新建一个结点
+		root=put(root, key,val);
+		root.color=BLACK;//根结点总是为黑色
+	}
+	private Node put(Node h,Key key,Value val) {
+		if(h==null) //标准的插入操作
+			return new Node(key, val, 1, RED);
+		int cmp=key.compareTo(h.key);
+		if(cmp<0) h.left=put(h.left, key, val);
+		else if(cmp>0) h.right=put(h.right, key, val);
+		else h.val=val;
+		
+		if(isRed(h.right)&&isRed(h.left)) h=rotateLeft(h);//右结点为红色，左结点黑色，进行左旋转
+		if(isRed(h.left)&&isRed(h.left.left)) h=rotateRight(h);//左结点且它的左结点为红，进行右旋转
+		if(isRed(h.left)&&isRed(h.right)) flipColors(h);//左右结点为红，进行颜色变化
+		h.N=size(h.left)+size(h.right)+1;
+		return h;
 	}
 }
